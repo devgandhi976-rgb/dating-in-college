@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Cupid - College Dating Portal</title>
+  
+  <style>
+    /* CSS Reset & Base Variables */
+    :root {
+      --primary-pink: #ff6b8b;
+      --secondary-pink: #ff8e9e;
+      --soft-pink: #fff0f3;
+      --bubblegum: #ff477e;
+      --deep-rose: #d90429;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(255, 182, 193, 0.45);
+      --text-dark: #2d1822;
+      --text-muted: #7d6570;
+      --shadow-romantic: 0 16px 40px rgba(255, 107, 139, 0.22);
+      --radius-lg: 24px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ffeef2 0%, #ffd6e0 50%, #ffc2d1 100%);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Floating Hearts Canvas & Animated Background */
+    #heartCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Container Card with Glassmorphism */
+    .app-shell {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-romantic);
+      padding: 28px 24px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Brand Header */
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1.5px dashed rgba(255, 107, 139, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #ff3366, #ff758c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #ffe3eb;
+      color: #ff3366;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Screen Transitions */
+    .screen {
+      display: none;
+      animation: fadeInSlide 0.4s ease forwards;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Forms, Inputs and Buttons */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #3b1b28;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #553344;
+      margin-bottom: 6px;
+    }
+
+    .custom-input, select {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid #ffccd5;
+      background: #ffffff;
+      font-size: 0.95rem;
+      color: #333;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .custom-input:focus, select:focus {
+      border-color: var(--primary-pink);
+      box-shadow: 0 0 0 3px rgba(255, 107, 139, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4d6d, #ff758f);
+      color: #ffffff;
+      box-shadow: 0 6px 16px rgba(255, 77, 109, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #ffe5ec;
+      color: #ff3366;
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: #ffd1dc;
+    }
+
+    /* PIN Lock Screen */
+    .pin-display {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .pin-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #ff758f;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .pin-dot.filled {
+      background: #ff477e;
+      transform: scale(1.15);
+      box-shadow: 0 0 8px rgba(255, 71, 126, 0.6);
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .key-btn {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 1px solid #ffd1dc;
+      background: white;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #4a2839;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.2);
+      transition: all 0.15s;
+    }
+
+    .key-btn:hover {
+      background: #ffe3eb;
+    }
+
+    .key-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Middle Finger / Error Display */
+    .rejection-box {
+      display: none;
+      text-align: center;
+      animation: shake 0.4s ease;
+      margin-top: 16px;
+      padding: 12px;
+      background: #ffe0e3;
+      border: 1.5px solid #ff5964;
+      border-radius: var(--radius-md);
+    }
+
+    .middle-finger-emoji {
+      font-size: 3.5rem;
+      line-height: 1;
+      display: block;
+      margin-bottom: 4px;
+      animation: bounce 0.6s infinite alternate;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    @keyframes bounce {
+      from { transform: scale(0.9); }
+      to { transform: scale(1.1); }
+    }
+
+    /* Choice Radio Cards */
+    .radio-card-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .radio-card {
+      position: relative;
+    }
+
+    .radio-card input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 10px;
+      background: #ffffff;
+      border: 1.5px solid #ffd4dc;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .radio-card input:checked + .radio-label {
+      border-color: #ff3366;
+      background: #fff0f5;
+      color: #ff3366;
+      box-shadow: 0 4px 12px rgba(255, 51, 102, 0.15);
+    }
+
+    /* Koi Aapka Intzaar Kar Raha Hai - Notification Banner */
+    .wait-alert {
+      background: linear-gradient(135deg, #fff275, #ff8e9e);
+      border: 2px dashed #ff3366;
+      color: #630c25;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 18px rgba(255, 71, 126, 0.45);
+      animation: pulseGlow 1.8s infinite;
+      display: none;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    /* Selection Tags (Lectures, Food, Cities) */
+    .tags-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tag-item {
+      padding: 12px 10px;
+      background: white;
+      border: 1.5px solid #ffccd5;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag-item.selected {
+      background: #ff4d6d;
+      color: white;
+      border-color: #ff4d6d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 77, 109, 0.3);
+    }
+
+    /* Preference Notice for Female user */
+    .preference-pill {
+      background: #ffe3eb;
+      color: #d90429;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-bottom: 12px;
+      border: 1px dashed #ff758f;
+    }
+
+    /* Romantic Chatroom */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 380px;
+      background: #fff8f9;
+      border-radius: var(--radius-md);
+      border: 1.5px solid #ffccd5;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: linear-gradient(90deg, #ff758f, #ff4d6d);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.35;
+      word-wrap: break-word;
+      position: relative;
+    }
+
+    .message.sent {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #ff5c8a, #ff3366);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.received {
+      align-self: flex-start;
+      background: #ffffff;
+      color: #333;
+      border: 1px solid #ffd1dc;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-meta {
+      font-size: 0.65rem;
+      margin-top: 3px;
+      opacity: 0.75;
+      text-align: right;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ffe0e6;
+      gap: 8px;
+    }
+
+    .chat-input-bar input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 20px;
+      border: 1.5px solid #ffccd5;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .chat-send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #ff3366;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+
+    .chat-send-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .hint-chip {
+      font-size: 0.75rem;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #666;
+      border: 1px solid #eee;
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    /* Modal / Toast Box */
+    .custom-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #2b1d24;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 999;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .custom-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Hearts Canvas -->
+  <canvas id="heartCanvas"></canvas>
+
+  <main class="app-shell">
+    
+    <!-- Top Header -->
+    <header class="brand-bar">
+      <div class="brand-title">
+        <span>💘</span> Campus Cupid
+      </div>
+      <div class="badge-pill" id="statusBadge">Safe & Verified</div>
+    </header>
+
+    <!-- SCREEN 1: PIN AUTHENTICATION -->
+    <section class="screen active" id="pinScreen">
+      <h2 class="section-title">Secret Campus Gate</h2>
+      <p class="section-desc">Enter the college access passcode to enter</p>
+      
+      <div class="pin-display">
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+        <div class="pin-dot" id="dot4"></div>
+      </div>
+
+      <div class="keypad">
+        <button class="key-btn" onclick="pressPin('1')">1</button>
+        <button class="key-btn" onclick="pressPin('2')">2</button>
+        <button class="key-btn" onclick="pressPin('3')">3</button>
+        <button class="key-btn" onclick="pressPin('4')">4</button>
+        <button class="key-btn" onclick="pressPin('5')">5</button>
+        <button class="key-btn" onclick="pressPin('6')">6</button>
+        <button class="key-btn" onclick="pressPin('7')">7</button>
+        <button class="key-btn" onclick="pressPin('8')">8</button>
+        <button class="key-btn" onclick="pressPin('9')">9</button>
+        <button class="key-btn" onclick="clearPin()">C</button>
+        <button class="key-btn" onclick="pressPin('0')">0</button>
+        <button class="key-btn" onclick="verifyPin()">✓</button>
+      </div>
+
+      <div class="hint-chip" style="display:block; text-align:center; margin-top:14px;">
+        💡 Valid Access Passcode: <b>1432</b> or <b>2026</b>
+      </div>
+
+      <!-- Rejection with Middle Finger -->
+      <div class="rejection-box" id="rejectionCard">
+        <span class="middle-finger-emoji">🖕</span>
+        <div style="font-weight:700; color:#d90429;">INVALID ACCESS PIN!</div>
+        <small style="color:#666;">Entry Denied. Please enter the valid passcode.</small>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: USER PROFILE & CRUSH PREFERENCE -->
+    <section class="screen" id="profileScreen">
+      <h2 class="section-title">Who Are You? 🎓</h2>
+      <p class="section-desc">Create your college connection profile</p>
+
+      <div class="input-group">
+        <label class="input-label" for="userNameInput">Your Full Name</label>
+        <input type="text" id="userNameInput" class="custom-input" placeholder="e.g., Aarav Sharma / Priya Patel">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Your Gender</label>
+        <div class="radio-card-group">
+          <label class="radio-card">
+            <input type="radio" name="myGender" value="Boy" checked>
+            <div class="radio-label">👦 Boy</div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="myGender" value="Girl">
+            <div class="radio-label">👧 Girl</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">You look for in college:</label>
+        <div class="radio-card-group">
+          <label class="radio-card">
+            <input type="radio" name="lookingFor" value="Girl" checked>
+            <div class="radio-label">🌸 A Girl</div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="lookingFor" value="Boy">
+            <div class="radio-label">⚡ A Boy</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Do you already have a college crush?</label>
+        <div class="radio-card-group">
+          <label class="radio-card">
+            <input type="radio" name="crushChoice" value="yes" onchange="toggleCrushInput(true)">
+            <div class="radio-label">❤️ Yes, I have a name</div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="crushChoice" value="no" checked onchange="toggleCrushInput(false)">
+            <div class="radio-label">✨ Looking to meet someone</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group" id="crushNameContainer" style="display:none;">
+        <label class="input-label" for="crushNameInput">Enter College Crush Name</label>
+        <input type="text" id="crushNameInput" class="custom-input" placeholder="Exact name of your college crush">
+      </div>
+
+      <button class="btn btn-primary" onclick="submitProfile()">Continue to Matchmaking ✨</button>
+    </section>
+
+    <!-- SCREEN 3: MATCHMAKING & INTZAAR NOTIFICATION -->
+    <section class="screen" id="matchingScreen">
+      <!-- Special Condition Statement -->
+      <div class="wait-alert" id="waitAlertBox">
+        💌 "Koi aapka intzaar kar raha hai!"<br>
+        <span style="font-size:0.85rem; font-weight:normal;">A student in your college likes you back!</span>
+      </div>
+
+      <h2 class="section-title" id="matchHeadline">College Sparks Found!</h2>
+      <p class="section-desc" id="matchSubline">We found your potential campus match</p>
+
+      <div style="background:white; border-radius:var(--radius-md); padding:18px; border:1px solid #ffd1dc; margin-bottom:20px; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:8px;" id="matchedAvatar">👩‍🎓</div>
+        <h3 id="matchedNameDisplay" style="color:#d90429; font-size:1.3rem;">Riya Sharma</h3>
+        <p id="matchedDetails" style="font-size:0.85rem; color:#7d6570; margin-top:4px;">B.Tech 2nd Year • Connected with you</p>
+      </div>
+
+      <!-- College Lecture Together Question -->
+      <div class="input-group">
+        <label class="input-label" style="text-align:center;">Do you want to attend a college lecture together?</label>
+        <div class="radio-card-group" style="margin-top:10px;">
+          <button type="button" class="btn btn-secondary" onclick="chooseLectureAttendance(false)">No, Skip Lecture</button>
+          <button type="button" class="btn btn-primary" onclick="chooseLectureAttendance(true)">Yes, Attend Together</button>
+        </div>
+      </div>
+
+      <!-- Lecture Selection -->
+      <div id="lectureOptionsCard" style="display:none; margin-top:16px;">
+        <label class="input-label">Select which college lecture you both want to attend:</label>
+        <div class="tags-grid" id="lectureGrid">
+          <div class="tag-item" onclick="selectTag(this, 'lecture')">IC 101</div>
+          <div class="tag-item" onclick="selectTag(this, 'lecture')">IC 102</div>
+          <div class="tag-item" onclick="selectTag(this, 'lecture')">IC 104</div>
+          <div class="tag-item" onclick="selectTag(this, 'lecture')">IC 105</div>
+          <div class="tag-item" onclick="selectTag(this, 'lecture')">PC1</div>
+        </div>
+        <button class="btn btn-primary" onclick="proceedToDatePlan()">Confirm Lecture & Plan Date ➡️</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: DATE & OUTING PLANNER -->
+    <section class="screen" id="datePlanScreen">
+      <h2 class="section-title">Plan The College Date 🗓️</h2>
+      <p class="section-desc">Coordinate your schedule, city & favorite food</p>
+
+      <div class="input-group">
+        <label class="input-label">Pick Date & Month</label>
+        <div style="display:flex; gap:10px;">
+          <input type="number" id="dateDay" class="custom-input" min="1" max="31" placeholder="Day (e.g. 14)">
+          <select id="dateMonth">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October" selected>October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Female Preference Highlight -->
+      <div style="text-align:center;">
+        <span class="preference-pill">👩 First Preference Priority: Female Partner Choice</span>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Where will you go for the date?</label>
+        <div class="tags-grid" id="cityGrid">
+          <div class="tag-item selected" onclick="selectSingleTag(this, 'city')">1. Gandhinagar</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'city')">2. Ahmedabad</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'city')">3. Other City</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Food Preference to Eat:</label>
+        <div class="tags-grid" id="foodGrid">
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">Italian 🍝</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">Mexican 🌮</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">Chinese 🍜</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">South Indian 🥥</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">North Indian 🥘</div>
+          <div class="tag-item" onclick="selectSingleTag(this, 'food')">Other 🍰</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="verifyDateSchedule()">Confirm Outing Details 🥂</button>
+    </section>
+
+    <!-- SCREEN 5: DATE SATISFACTION VERIFICATION -->
+    <section class="screen" id="satisfactionScreen">
+      <h2 class="section-title">Post-Date Satisfaction Check</h2>
+      <p class="section-desc">Are you satisfied with how this date is planned?</p>
+
+      <div style="background:#fff; border-radius:var(--radius-md); padding:20px; border:1px solid #ffd4dc; margin-bottom:20px; text-align:center;">
+        <div style="font-size:2.8rem; margin-bottom:10px;">🌟</div>
+        <p style="font-size:1.05rem; font-weight:700; color:#4a1e2d; margin-bottom:6px;" id="summaryText">
+          Date planned in Gandhinagar with Delicious Treats!
+        </p>
+        <small style="color:#777;">Both partners must confirm satisfaction to unlock the private love chatroom.</small>
+      </div>
+
+      <div class="radio-card-group">
+        <button class="btn btn-secondary" onclick="handleSatisfaction(false)">❌ No, Not Satisfied</button>
+        <button class="btn btn-primary" onclick="handleSatisfaction(true)">💖 Yes, I'm Satisfied!</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: ROMANTIC LOVE CHATROOM -->
+    <section class="screen" id="chatScreen">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.3rem;">💖</span>
+            <div>
+              <div id="chatPartnerName" style="font-size:0.95rem;">Riya Sharma</div>
+              <div style="font-size:0.7rem; font-weight:normal; opacity:0.9;">Online • Connected via Campus Cupid</div>
+            </div>
+          </div>
+          <span style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:3px 8px; border-radius:12px;">🔒 Private</span>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="message received">
+            Hey! So happy we connected! Our date and lecture plan look so exciting! 💕
+            <div class="message-meta">Just now</div>
+          </div>
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="chatInput" placeholder="Send a romantic message..." onkeypress="handleChatKey(event)">
+          <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" style="margin-top:14px;" onclick="resetApp()">↺ Start Over / Switch User</button>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div class="custom-toast" id="toastBox">Message here</div>
+
+  <script>
+    /* Global Application State */
+    const VALID_PINS = ['1432', '2026'];
+    let enteredPin = '';
+    
+    // Default simulated student database in college
+    const collegeStudents = [
+      { name: 'Priya Sharma', gender: 'Girl', crushOn: 'Aarav', branch: 'IC 101' },
+      { name: 'Ananya Verma', gender: 'Girl', crushOn: '', branch: 'IC 102' },
+      { name: 'Rohan Mehta', gender: 'Boy', crushOn: 'Sneha', branch: 'PC1' },
+      { name: 'Kabir Patel', gender: 'Boy', crushOn: '', branch: 'IC 105' }
+    ];
+
+    let userProfile = {
+      name: '',
+      gender: 'Boy',
+      lookingFor: 'Girl',
+      hasCrush: false,
+      crushName: ''
+    };
+
+    let matchPartner = null;
+    let selectedLecture = 'IC 101';
+    let selectedCity = 'Gandhinagar';
+    let selectedFood = 'Italian';
+
+    /* Audio & Web Speech Synthesizer */
+    function speakFutureDeviceConnected() {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        const text = "YOUR FUTURE DEVICE IS CONNECTED";
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1;
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+      playChime(true);
+    }
+
+    /* Web Audio API Synthesizer (No external mp3) */
+    function playChime(success = true) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (success) {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+          osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.15); // E5
+          osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.3); // G5
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.5);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        }
+      } catch (e) {
+        console.warn('Audio Context interaction prevented or not supported', e);
+      }
+    }
+
+    /* Screen Navigator */
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toastBox');
+      toast.innerText = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function pressPin(digit) {
+      if (enteredPin.length < 4) {
+        enteredPin += digit;
+        updatePinDots();
+        if (enteredPin.length === 4) {
+          setTimeout(verifyPin, 150);
+        }
+      }
+    }
+
+    function clearPin() {
+      enteredPin = '';
+      updatePinDots();
+      document.getElementById('rejectionCard').style.display = 'none';
+    }
+
+    function updatePinDots() {
+      for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById('dot' + i);
+        if (i <= enteredPin.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      }
+    }
+
+    function verifyPin() {
+      const rejection = document.getElementById('rejectionCard');
+      if (VALID_PINS.includes(enteredPin)) {
+        rejection.style.display = 'none';
+        speakFutureDeviceConnected();
+        showToast("Access Granted! Welcome to Campus Cupid 💕");
+        setTimeout(() => {
+          showScreen('profileScreen');
+        }, 1200);
+      } else {
+        playChime(false);
+        rejection.style.display = 'block';
+        showToast("Invalid PIN! Try 1432 or 2026");
+        setTimeout(() => {
+          clearPin();
+        }, 1200);
+      }
+    }
+
+    function toggleCrushInput(show) {
+      document.getElementById('crushNameContainer').style.display = show ? 'block' : 'none';
+    }
+
+    function submitProfile() {
+      const nameInput = document.getElementById('userNameInput').value.trim();
+      if (!nameInput) {
+        showToast("Please enter your name!");
+        return;
+      }
+
+      userProfile.name = nameInput;
+      userProfile.gender = document.querySelector('input[name="myGender"]:checked').value;
+      userProfile.lookingFor = document.querySelector('input[name="lookingFor"]:checked').value;
+      userProfile.hasCrush = document.querySelector('input[name="crushChoice"]:checked').value === 'yes';
+      userProfile.crushName = userProfile.hasCrush ? document.getElementById('crushNameInput').value.trim() : '';
+
+      findCollegeMatch();
+      showScreen('matchingScreen');
+    }
+
+    function findCollegeMatch() {
+      const waitAlert = document.getElementById('waitAlertBox');
+      const partnerDisplay = document.getElementById('matchedNameDisplay');
+      const avatarDisplay = document.getElementById('matchedAvatar');
+      const headline = document.getElementById('matchHeadline');
+
+      // Check if any registered student entered our user's name as crush
+      const someoneLikesMe = collegeStudents.find(st => 
+        st.crushOn.toLowerCase() === userProfile.name.toLowerCase()
+      );
+
+      // Or if user entered a crush name that matches a student or custom
+      let matchedStudentName = '';
+
+      if (someoneLikesMe) {
+        // CONDITION: Exactly match with user name -> "koi aapka intzaar kar raha hai"
+        waitAlert.style.display = 'block';
+        waitAlert.innerHTML = `💌 "koi aapka intzaar kar raha hai"<br><span style="font-weight:normal; font-size:0.9rem;">${someoneLikesMe.name} is waiting for you in campus!</span>`;
+        matchedStudentName = someoneLikesMe.name;
+        matchPartner = {
+          name: someoneLikesMe.name,
+          gender: someoneLikesMe.gender,
+          branch: someoneLikesMe.branch
+        };
+      } else if (userProfile.hasCrush && userProfile.crushName) {
+        // User entered specific crush name
+        waitAlert.style.display = 'none';
+        matchedStudentName = userProfile.crushName;
+        matchPartner = {
+          name: userProfile.crushName,
+          gender: userProfile.lookingFor,
+          branch: 'IC 102'
+        };
+      } else {
+        // Random college match
+        waitAlert.style.display = 'none';
+        const candidate = collegeStudents.find(s => s.gender === userProfile.lookingFor) || {
+          name: userProfile.lookingFor === 'Girl' ? 'Riya Sharma' : 'Kabir Mehta',
+          gender: userProfile.lookingFor,
+          branch: 'IC 101'
+        };
+        matchedStudentName = candidate.name;
+        matchPartner = candidate;
+      }
+
+      partnerDisplay.innerText = matchedStudentName;
+      avatarDisplay.innerText = matchPartner.gender === 'Girl' ? '👧' : '👦';
+      headline.innerText = `You & ${matchedStudentName} Matched!`;
+    }
+
+    function chooseLectureAttendance(wantsLecture) {
+      const lectureCard = document.getElementById('lectureOptionsCard');
+      if (wantsLecture) {
+        lectureCard.style.display = 'block';
+        showToast("Great! Pick the lecture you both want to attend 📚");
+      } else {
+        selectedLecture = 'None (Date directly)';
+        proceedToDatePlan();
+      }
+    }
+
+    function selectTag(element, group) {
+      document.querySelectorAll(`#lectureGrid .tag-item`).forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+      selectedLecture = element.innerText;
+    }
+
+    function selectSingleTag(element, type) {
+      if (type === 'city') {
+        document.querySelectorAll('#cityGrid .tag-item').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedCity = element.innerText.replace(/^\d+\.\s*/, '');
+      } else if (type === 'food') {
+        document.querySelectorAll('#foodGrid .tag-item').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedFood = element.innerText;
+      }
+    }
+
+    function proceedToDatePlan() {
+      showScreen('datePlanScreen');
+    }
+
+    function verifyDateSchedule() {
+      const day = document.getElementById('dateDay').value || '15';
+      const month = document.getElementById('dateMonth').value;
+
+      const summaryText = document.getElementById('summaryText');
+      summaryText.innerHTML = `Date planned on <b>${day} ${month}</b> at <b>${selectedCity}</b> with <b>${selectedFood}</b> cuisine!`;
+
+      showScreen('satisfactionScreen');
+    }
+
+    function handleSatisfaction(satisfied) {
+      if (satisfied) {
+        showToast("💖 Date approved! Unlocking Heart Chatroom...");
+        setTimeout(() => {
+          document.getElementById('chatPartnerName').innerText = matchPartner.name;
+          showScreen('chatScreen');
+        }, 800);
+      } else {
+        showToast("Let's revise your date choices!");
+        showScreen('datePlanScreen');
+      }
+    }
+
+    function handleChatKey(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const messagesContainer = document.getElementById('chatMessages');
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Add user message
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message sent';
+      msgDiv.innerHTML = `${escapeHTML(text)} <div class="message-meta">${now}</div>`;
+      messagesContainer.appendChild(msgDiv);
+      input.value = '';
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Romantic Auto Replies
+      setTimeout(() => {
+        playChime(true);
+        const replyDiv = document.createElement('div');
+        replyDiv.className = 'message received';
+        const partnerName = matchPartner ? matchPartner.name.split(' ')[0] : 'Partner';
+        
+        const romanticReplies = [
+          `Can't wait to see you for our ${selectedLecture !== 'None' ? selectedLecture + ' lecture and' : ''} outing in ${selectedCity}! 🥰`,
+          `I was hoping you'd say that! You make college feel so special. 💖`,
+          `Counting down the days! ${selectedFood} sounds perfect for us! ✨`,
+          `You're really sweet. Looking forward to our time together in campus! 🌸`
+        ];
+
+        const randomReply = romanticReplies[Math.floor(Math.random() * romanticReplies.length)];
+        replyDiv.innerHTML = `${randomReply} <div class="message-meta">Just now</div>`;
+        messagesContainer.appendChild(replyDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 1100);
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function resetApp() {
+      clearPin();
+      document.getElementById('userNameInput').value = '';
+      document.getElementById('crushNameInput').value = '';
+      showScreen('pinScreen');
+    }
+
+    const canvas = document.getElementById('heartCanvas');
+    const ctx = canvas.getContext('2d');
+    let hearts = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class FloatingHeart {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20 + Math.random() * 40;
+        this.size = 12 + Math.random() * 22;
+        this.speedY = 0.8 + Math.random() * 1.5;
+        this.speedX = (Math.random() - 0.5) * 0.8;
+        this.opacity = 0.2 + Math.random() * 0.5;
+        this.color = ['#ff4d6d', '#ff758f', '#ff85a1', '#ffb3c1'][Math.floor(Math.random() * 4)];
+      }
+
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -30) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        // Draw heart shape
+        const s = this.size;
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-s / 2, -s / 2, -s, s / 3, 0, s);
+        ctx.bezierCurveTo(s, s / 3, s / 2, -s / 2, 0, 0);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Initialize hearts
+    for (let i = 0; i < 28; i++) {
+      const h = new FloatingHeart();
+      h.y = Math.random() * canvas.height;
+      hearts.push(h);
+    }
+
+    function animateHearts() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hearts.forEach(h => {
+        h.update();
+        h.draw();
+      });
+      requestAnimationFrame(animateHearts);
+    }
+
+    window.onload = function() {
+      animateHearts();
+    };
+  </script>
+</body>
+</html>
